@@ -1,33 +1,30 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-<head>
-    <script src="https://d3js.org/d3.v4.min.js"></script>
-</head>
-<style>
-    svg rect {
-        fill: orange;
-    }
+  <head>
 
-    svg text {
-        fill:white;
-        font: 10px sans-serif;
-        text-anchor: end;
-    }
-</style>
-<body>
-    <svg class="chart" width="420" height="120">
-        <g transform="translate(0,0)">
-            <rect width="50" height="19"></rect>
-            <text x="47" y="9.5" dy=".35em">5</text>
-        </g>
-        <g transform="translate(0,20)">
-            <rect width="100" height="19"></rect>
-            <text x="97" y="9.5" dy=".35em">10</text>
-        </g>
-        <g transform="translate(0,40)">
-            <rect width="120" height="19"></rect>
-            <text x="117" y="9.5" dy=".35em">12</text>
-        </g>
-    </svg>
-</body>
+   <script type="application/javascript" src="awesomechart.js"></script>
+                        
+    <script type="application/javascript">
+      function drawMyChart(){
+        if(!!document.createElement('canvas').getContext){ //check that the canvas
+                                                           // element is supported
+            var mychart = new AwesomeChart('canvas1');
+            mychart.title = "Product Sales - 2010";
+            mychart.data = [1532, 3251, 3460, 1180, 6543];
+            mychart.labels = ["Desktops", "Laptops", "Netbooks", "Tablets", "Smartphones"];
+            mychart.draw();
+        }
+      }
+      
+      window.onload = drawMyChart;
+    </script>
+
+  </head>
+  <body>
+	<h1>THis</h1>
+       <canvas id="canvas1" width="300" height="300">
+        Your web-browser does not support the HTML 5 canvas element.
+    </canvas>
+
+  </body>
 </html>

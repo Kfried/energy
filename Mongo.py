@@ -1,3 +1,4 @@
+import bson
 from pymongo import MongoClient
 
 
@@ -5,14 +6,14 @@ class mongo_db:
     from pymongo import MongoClient
     import pymongo
 
-    def __init__(self, string_value, password):
+    def __init__(self, string_value, password, database_name):
         CONNECTION_STRING = string_value.replace('<password>', password)
         self.client = MongoClient(CONNECTION_STRING)
-        self.db = None
+        self.db = self.client[database_name]
 
-
-    def initialise_db(self, name):
-        self.db = self.client[name]
+    def check_collection_present(self, name):
+        collections = self.db.list_collection_names()
+        return name in collections
 
     def insert_data(self,collection , data):
         column = self.db[collection]
@@ -23,6 +24,6 @@ class mongo_db:
             print("Single entry")
             result = column.insert_one(data)
 
-    def get_data(self, collection, query):
+    def get_data(self, collection, filter):
         col = self.db[collection]
-        return col.find(query)
+        return col.find(filter)

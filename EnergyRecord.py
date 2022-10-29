@@ -1,10 +1,11 @@
 import datetime
+from dateutil import parser
 from decimal import *
 from bson.decimal128 import Decimal128
 
 class EnergyRecord:
     import datetime
-    def __init__(self, record=None, data_line=None, source_type=None):
+    def __init__(self, record=None, data_line=None, api_entry = None,  source_type=None):
         if data_line:
             self.id = id
             self.source_type = source_type
@@ -19,6 +20,11 @@ class EnergyRecord:
             self.date = record['date']
             self.duration = record['duration']
             self.reading = record['reading']
+        elif api_entry:
+            self.source_type = source_type
+            self.date = parser.parse(api_entry['interval_start'])
+            self.duration = 30
+            self.reading = api_entry['consumption']
 
     def process_line(self, line):
         delimit = line.split(',')
