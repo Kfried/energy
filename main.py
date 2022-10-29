@@ -29,7 +29,7 @@ def parse_file(file_name):
     return parsed_data
 
 
-def parse_records(records):
+def parse_records_to_json(records):
     parsed_data = []
     for record in records:
         parsed_data.append(record.record_as_dict())
@@ -95,6 +95,7 @@ def main():
                     delimit_argument = item.split('=')
                     arguments[delimit_argument[0]] = delimit_argument[1]
                 except:
+                    print('There was a problem parsing arguments')
                     return 0
 
         if command not in active_commands:
@@ -129,20 +130,41 @@ def main():
             for item in content.items():
                 print(item)
 
+        #sync logic
+        '''
+        This logic is the heavyweight:
+        given records for a collection are loaded to memory 
+        when the sync is executed
+        then the records are loaded to the appropriate collection 
+            AND duplicate timestamps overwrite target
+            AND runner collection is updated for collection start and end'''
         if command == 'sync':
             if loaded:
                 collection_name = arguments['collection']
                 check_collection = db.check_collection_present(collection_name)
                 if check_collection:
+                    #collection present logic
                     print('collection available')
+                    if 'wipe' in arguments:
+                        if db.drop_collection(collection_name):
+                            print('collection purged, reloading')
+                    db.insert_data(collection_name, parse_records_to_json(records))
+
                 else:
                     add_it = input(f'collection {collection_name} is not available, do you want to add it')
                     if add_it:
-                        db.insert_data(collection_name, records)
+                        if db.create_collection(collection_name):
+                            db.insert_data(collection_name, parse_records_to_json(records))
                     else:
                         print('exiting sync')
+
+        if command == 'aggregagte':
+            if loaded:
+                records = aggregate_data(records, arguments['value'])
             else:
                 print('no data loaded')
+
+        #update logic
 
         if command == 'exit':
             return

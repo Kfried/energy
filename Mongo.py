@@ -11,9 +11,18 @@ class mongo_db:
         self.client = MongoClient(CONNECTION_STRING)
         self.db = self.client[database_name]
 
+    def create_collection(self, collection):
+        self.db.create_collection(collection)
+        return self.check_collection_present(collection)
+
     def check_collection_present(self, name):
         collections = self.db.list_collection_names()
         return name in collections
+
+    def drop_collection(self, collection):
+        column = self.db[collection]
+        column.drop()
+        return not self.check_collection_present(collection)
 
     def insert_data(self,collection , data):
         column = self.db[collection]
