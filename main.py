@@ -1,5 +1,6 @@
 from aggregation_control import *
 from chart_manager import Chart
+from data_transforms import DataTransformer as dfm
 import pandas
 
 import bson
@@ -41,10 +42,8 @@ def write_to_mongo(db, content, collection):
     db.insert_data(collection, content)
 
 
-def read_from_mongo(db, collection, source_type):
-    db.initialise_db(collection)
-    filter = {'source_type': source_type}
-    return db.get_data(collection, filter)
+def read_from_mongo(db, collection, dates):
+    return db.get_data(collection, dates)
 
 
 def connect(database_name):
@@ -69,10 +68,7 @@ def send_data_to_graph(data):
         out_file.write(contents)
 
 
-def format_dates(line):
-    delimit = line.split(',')
-    date_range = f'?period_from={delimit[0]}T00:00Z&period_to={delimit[1]}T00:00Z'
-    return date_range
+
 
 
 def main():
@@ -106,7 +102,7 @@ def main():
                 load_from_file(db, arguments['type'], arguments['source'])
             elif arguments['type'] == 'api':
                 if 'dates' in arguments:
-                    data = api_handler.get_data(arguments['source'], dates=format_dates(arguments['dates']))
+                    data = api_handler.get_data(arguments['source'], dates=dfm.format_dates(arguments['dates']))
                 else:
                     data = api_handler.get_data(arguments['source'])
                 for reading_set in data:
@@ -115,6 +111,16 @@ def main():
                 if 'agg' in arguments:
                     aggregation = aggregate_data(records, arguments['agg'])
                     records = aggregation
+                for r in records:
+                    print(r)
+            elif arguments['type'] == 'mongo':
+                if 'dates' in arguments:
+                    raw = read_from_mongo(db,arguments['collection'], dates=dfm.format_dates(arguments['dates']))
+                else:
+                    raw = read_from_mongo(db, arguments['collection'])
+                records = []
+                for entry in raw:
+                    records.append(EnergyRecord(record=entry))
                 for r in records:
                     print(r)
             loaded = True
